@@ -101,7 +101,6 @@ static int libpci_add_fun(uint8_t bus, uint8_t dev, uint8_t fun)
            libpci_read_reg8(bus, dev, fun, PCI_INTERRUPT_LINE),
            libpci_read_reg8(bus, dev, fun, PCI_INTERRUPT_PIN)
           );
-
     libpci_device_list[libpci_num_devices].bus = bus;
     libpci_device_list[libpci_num_devices].dev = dev;
     libpci_device_list[libpci_num_devices].fun = fun;
