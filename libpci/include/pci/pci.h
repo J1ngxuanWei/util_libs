@@ -56,7 +56,7 @@ libpci_device_t* libpci_find_device_matching(libpci_device_t *device);
 libpci_device_t* libpci_find_device_bdf(uint8_t bus, uint8_t dev, uint8_t fun);
 
 /* Scan the entire PCI space, find every device and popular device structures. */
-void libpci_scan(ps_io_port_ops_t port_ops);
+void libpci_scan(ps_io_port_ops_t port_ops_in, ps_io_port_ops_t port_ops_out);
 
 /* Read base addr info from give device, and populate a base addr info structure. */
 void libpci_read_ioconfig(libpci_device_iocfg_t *cfg, uint8_t bus, uint8_t dev, uint8_t fun);

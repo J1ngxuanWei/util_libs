@@ -15,16 +15,17 @@
 
 libpci_device_t libpci_device_list[PCI_MAX_DEVICES];
 uint32_t libpci_num_devices = 0;
-static ps_io_port_ops_t global_port_ops;
+static ps_io_port_ops_t global_port_ops_in;
+static ps_io_port_ops_t global_port_ops_out;
 
 uint32_t libpci_ioread(uint32_t port_no, uint32_t *val, uint32_t size)
 {
-    return (uint32_t)ps_io_port_in(&global_port_ops, port_no, (int)size, val);
+    return (uint32_t)ps_io_port_in(&global_port_ops_in, port_no, (int)size, val);
 }
 
 uint32_t libpci_iowrite(uint32_t port_no, uint32_t val, uint32_t size)
 {
-    return (uint32_t)ps_io_port_out(&global_port_ops, port_no, (int)size, val);
+    return (uint32_t)ps_io_port_out(&global_port_ops_out, port_no, (int)size, val);
 }
 
 libpci_device_t *libpci_find_device(uint16_t vendor_id, uint16_t device_id)
@@ -90,11 +91,16 @@ static int libpci_add_fun(uint8_t bus, uint8_t dev, uint8_t fun)
     ZF_LOGD("    vendorID = %s [0x%x]\n", libpci_vendorID_str(vendor_id), vendor_id);
 
     uint16_t device_id = libpci_read_reg16(bus, dev, fun, PCI_DEVICE_ID);
-    ZF_LOGD("    deviceID = %s [0x%x]\n", libpci_deviceID_str(vendor_id, device_id), device_id);
-
     if (libpci_num_devices + 1 > PCI_MAX_DEVICES) {
         return 0;
     }
+
+    printf("PCI :: %.2x.%.2x.%.2x : %s %s (vid 0x%x did 0x%x) line%d pin%d\n", bus, dev, fun,
+           libpci_vendorID_str(vendor_id), libpci_deviceID_str(vendor_id, device_id),
+           vendor_id, device_id,
+           libpci_read_reg8(bus, dev, fun, PCI_INTERRUPT_LINE),
+           libpci_read_reg8(bus, dev, fun, PCI_INTERRUPT_PIN)
+          );
 
     libpci_device_list[libpci_num_devices].bus = bus;
     libpci_device_list[libpci_num_devices].dev = dev;
@@ -135,7 +141,6 @@ static void lib_pci_scan_dev(int bus, int dev)
     if (vendor_id == PCI_VENDOR_ID_INVALID) {
         return;
     }
-    ZF_LOGD("%s found pci device %d %d\n", __FUNCTION__, bus, dev);
     libpci_add_fun(bus, dev, 0);
     if ((libpci_read_reg8(bus, dev, 0, PCI_HEADER_TYPE) & 0x80) != 0) {
         ZF_LOGD("%s found multi function device %d %d\n", __FUNCTION__, bus, dev);
@@ -154,17 +159,19 @@ static void lib_pci_scan_bus(int bus)
     }
 }
 
-void libpci_scan(ps_io_port_ops_t port_ops)
+void libpci_scan(ps_io_port_ops_t port_ops_in, ps_io_port_ops_t port_ops_out)
 {
-    global_port_ops = port_ops;
+    global_port_ops_in = port_ops_in;
+    global_port_ops_out = port_ops_out;
 
     /* To handle cases where PCI or PCIe buses are not accessible via a bridge from bus 0, We
      * use "brute force" scan instead of recursive scan here. Details of these methods can be
      * found on https://wiki.osdev.org/PCI#.22Brute_Force.22_Scan. */
-    ZF_LOGD("PCI :: Scanning...\n");
+    printf("============================================ SCAN PCI START ============================================\n");
     for (int bus = 0; bus < 256; bus++) {
         lib_pci_scan_bus(bus);
     }
+    printf("============================================= SCAN PCI END =============================================\n");
 }
 
 void libpci_read_ioconfig(libpci_device_iocfg_t *cfg, uint8_t bus, uint8_t dev, uint8_t fun)

@@ -1900,6 +1900,7 @@ char* libpci_deviceID_str(int vid, int did) {
     if (vid == 0x8086 && did == 0x1062) return "intel_8257x_sol";
     if (vid == 0x8086 && did == 0x1085) return "intel_82573e_sol";
     if (vid == 0x8086 && did == 0x108F) return "intel_82573l_sol";
+    if (vid == 0x8086 && did == 0x10d3) return "intel_82574L_Gigabit_Network_Connection";
     if (vid == 0x8086 && did == 0x1130) return "intel_82815_mc";
     if (vid == 0x8086 && did == 0x1132) return "intel_82815_cgc";
     if (vid == 0x8086 && did == 0x1221) return "intel_82092aa_0";
