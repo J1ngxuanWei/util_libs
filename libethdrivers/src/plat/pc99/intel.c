@@ -1057,7 +1057,8 @@ static int common_init(struct eth_driver *driver, ps_io_ops_t io_ops, void *conf
     enable_interrupts(dev);
     /* check the current status of the link */
     check_link_status(dev);
-    return ps_interface_register(&io_ops.interface_registration_ops, PS_ETHERNET_INTERFACE, driver, NULL);
+    return 0;
+    //return ps_interface_register(&io_ops.interface_registration_ops, PS_ETHERNET_INTERFACE, driver, NULL);
 }
 
 int ethif_e82580_init(struct eth_driver *driver, ps_io_ops_t io_ops, void *config)
