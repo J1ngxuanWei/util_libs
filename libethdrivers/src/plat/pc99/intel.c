@@ -833,10 +833,12 @@ static void complete_tx(struct eth_driver *driver)
 {
     e1000_dev_t *dev = (e1000_dev_t *)driver->eth_data;
     while (dev->tdh != dev->tdt) {
+        printf("============poll, size: %i\n", (int)dev->tx_lengths[dev->tdh]);
         unsigned int i;
         for (i = 0; i < dev->tx_lengths[dev->tdh]; i++) {
             if (!(dev->tx_ring[(i + dev->tdh) % dev->tx_size].STA & TX_DD)) {
                 /* not all parts complete */
+                printf("============poll is not down, i %i, stat: %i\n", (int)i, (int)dev->tx_ring[(i + dev->tdh) % dev->tx_size].STA);
                 return;
             }
         }
@@ -847,6 +849,7 @@ static void complete_tx(struct eth_driver *driver)
         dev->tx_remain += dev->tx_lengths[dev->tdh];
         dev->tdh = (dev->tdh + dev->tx_lengths[dev->tdh]) % dev->tx_size;
         /* give the buffer back */
+        printf("============poll will call b\n");
         driver->i_cb.tx_complete(driver->cb_cookie, cookie);
     }
 }
@@ -1054,7 +1057,7 @@ static int common_init(struct eth_driver *driver, ps_io_ops_t io_ops, void *conf
     /* fill up the receive ring as much as possible */
     fill_rx_bufs(driver);
     /* turn interrupts on */
-    enable_interrupts(dev);
+    //enable_interrupts(dev);
     /* check the current status of the link */
     check_link_status(dev);
     return 0;
