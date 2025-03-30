@@ -129,6 +129,10 @@ static int libpci_add_fun(uint8_t bus, uint8_t dev, uint8_t fun)
 
     libpci_num_devices++;
 
+    uint16_t command = libpci_read_reg16(bus, dev, fun, PCI_COMMAND);
+    command |= (PCI_COMMAND_IO | PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER);
+    libpci_write_reg16(bus, dev, fun, PCI_COMMAND, command);
+
     return 1;
 }
 
